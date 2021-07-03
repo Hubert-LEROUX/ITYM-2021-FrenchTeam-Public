@@ -1,3 +1,5 @@
+import random as rd
+
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 def doProperKNumbering(graph, weight):
@@ -7,7 +9,17 @@ def doProperKNumbering(graph, weight):
     @return: une liste des labels de chaque noeud
     """
     nbNoeuds = len(graph)
+    #* On s'en fiche de l'ordre
     nodes = list(range(nbNoeuds)) # La liste des noeuds dans un ordre donné
+    #* On trie en fonction de s(v) croissant
+    # nodes.sort(key = lambda node: sum(weight[node]))
+    #* On trie en fonction de s(v) décroissant
+    # nodes.sort(key = lambda node: sum(weight[node]), reverse = True)
+    # print(nodes)
+    #* On trie au hasard
+    rd.shuffle(nodes)
+
+    print(f"Ordre d'application {[ALPHABET[node] for node in nodes]}")
 
     properNumbering = [0]*nbNoeuds # on met un 0 lorsque l'on a rien labeliser encore
 
@@ -90,11 +102,11 @@ def afficheGraphe(graph, weight):
 
 
 if __name__ == '__main__':
-    graph, weight = extractGraph("graph1")
+    graph, weight = extractGraph("graph2")
     # print(graph)
     print(f"S = {computeS(weight)}")
     properNumbering = doProperKNumbering(graph, weight)
-    print([(ALPHABET[node], value) for node, value in enumerate(doProperKNumbering(graph, weight))])
+    print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
     print(f"We have a vertex {max(properNumbering)}-numbering !")
     
     
