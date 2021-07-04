@@ -1,25 +1,28 @@
 import random as rd
+import sys
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-def doProperKNumbering(graph, weight):
+def doProperKNumbering(graph, weight, nodes=None):
     """
     @param: weight est une liste 2D qui donne la matrice d'adjacence du graphe
     @param: graph est une liste 2D qui donne la liste d'adjacence du graphe
     @return: une liste des labels de chaque noeud
     """
     nbNoeuds = len(graph)
-    #* On s'en fiche de l'ordre
-    nodes = list(range(nbNoeuds)) # La liste des noeuds dans un ordre donné
-    #* On trie en fonction de s(v) croissant
-    # nodes.sort(key = lambda node: sum(weight[node]))
-    #* On trie en fonction de s(v) décroissant
-    # nodes.sort(key = lambda node: sum(weight[node]), reverse = True)
-    # print(nodes)
-    #* On trie au hasard
-    rd.shuffle(nodes)
 
-    print(f"Ordre d'application {[ALPHABET[node] for node in nodes]}")
+    if nodes == None:
+        #* On s'en fiche de l'ordre
+        nodes = list(range(nbNoeuds)) # La liste des noeuds dans un ordre donné
+        #* On trie en fonction de s(v) croissant
+        # nodes.sort(key = lambda node: sum(weight[node]))
+        #* On trie en fonction de s(v) décroissant
+        # nodes.sort(key = lambda node: sum(weight[node]), reverse = True)
+        # print(nodes)
+        #* On trie au hasard
+        # rd.shuffle(nodes)
+
+    # print(f"Ordre d'application {[ALPHABET[node] for node in nodes]}")
 
     properNumbering = [0]*nbNoeuds # on met un 0 lorsque l'on a rien labeliser encore
 
@@ -35,7 +38,8 @@ def doProperKNumbering(graph, weight):
         for neighbor in graph[node]: # Pour chaque voisin
             if properNumbering[neighbor] > 0: # S'il a été etiqueté, il donne une nouvelle contrainte
                 w = weight[node][neighbor] # Poids de la liaison
-                S.append((max(1,properNumbering[neighbor]-w) , properNumbering[neighbor]+w))
+                if w > 0:
+                    S.append((max(1,properNumbering[neighbor]-w) , properNumbering[neighbor]+w))
         UnionIntervalsInterdits = intervals_union(S)
 
         if UnionIntervalsInterdits and UnionIntervalsInterdits[0][0] == 1: # On ne peut pas commencer à 1
@@ -101,12 +105,67 @@ def afficheGraphe(graph, weight):
         print(ALPHABET[node], [(ALPHABET[neighbor], weight[node][neighbor]) for neighbor in neighbors])
 
 
+def main():
+    """
+    Nous allons construire K4 et faire varier les coefficients
+    """
+    N = 4
+    graph = [[] for _ in range(N)]
+    for node in range(N):
+        for other in range(N):
+            if other != node:
+                graph[node].append(other)
+
+    weight = [[0]*N for _ in range(N)]
+
+    variables = [(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)]
+    valuesPossible = list(range(10))
+    bestRatio = 0
+
+    def recursiveTest(positionVariable):
+        """
+        Cette fonction permet de remplir la matrice d'adjacence en omettant aucun cas
+        On reproduira cependant de nombreuses fois le même graphe à un isomorphisme près
+        On met également à jour le meilleur ratio k / S
+        """
+        nonlocal weight, bestRatio
+        if positionVariable == -1: # Toutes les cases ont été remplies
+            S = computeS(weight)[0]
+            if S > 0:
+                properNumbering = doProperKNumbering(graph, weight)
+                k = max(properNumbering)
+                ratio = k / S
+                if bestRatio < ratio:
+                    bestRatio = ratio
+                if k == 2 * S:
+                    afficheGraphe(graph, weight)
+                    print(f"S = {computeS(weight)}")
+                    properNumbering = doProperKNumbering(graph, weight)
+                    print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
+                    print(f"We have a vertex {max(properNumbering)}-numbering !")
+                    exit()
+            return
+
+        for value in valuesPossible:
+            y,x = variables[positionVariable]
+            weight[y][x] = value
+            weight[x][y] = value
+            recursiveTest(positionVariable-1)
+
+    recursiveTest(len(variables)-1)
+    print(bestRatio)
+
+
+
+
 if __name__ == '__main__':
-    graph, weight = extractGraph("graph2")
-    # print(graph)
-    print(f"S = {computeS(weight)}")
-    properNumbering = doProperKNumbering(graph, weight)
-    print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
-    print(f"We have a vertex {max(properNumbering)}-numbering !")
+    # graph, weight = extractGraph("graph2")
+    # # print(graph)
+    # print(f"S = {computeS(weight)}")
+    # properNumbering = doProperKNumbering(graph, weight)
+    # print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
+    # print(f"We have a vertex {max(properNumbering)}-numbering !")
+
+    main()
     
     
