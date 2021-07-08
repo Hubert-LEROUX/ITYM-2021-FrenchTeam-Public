@@ -1,4 +1,5 @@
 import random as rd
+import os
 import sys
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -38,9 +39,12 @@ def doProperKNumbering(graph, weight, nodes=None):
         for neighbor in graph[node]: # Pour chaque voisin
             if properNumbering[neighbor] > 0: # S'il a été etiqueté, il donne une nouvelle contrainte
                 w = weight[node][neighbor] # Poids de la liaison
+                # print(f"The liaison between: {ALPHABET[node]}-{ALPHABET[neighbor]} has a label = {w}")
                 if w > 0:
-                    S.append((max(1,properNumbering[neighbor]-w) , properNumbering[neighbor]+w))
+                    S.append((max(1,properNumbering[neighbor]-w+1) , properNumbering[neighbor]+w)) # Intervalle d'interdiction semi-ouvert [a,b[
+                    # print(S)
         UnionIntervalsInterdits = intervals_union(S)
+        # print(f"For node: {ALPHABET[node]}, the union of intervals = {UnionIntervalsInterdits}")
 
         if UnionIntervalsInterdits and UnionIntervalsInterdits[0][0] == 1: # On ne peut pas commencer à 1
             return UnionIntervalsInterdits[0][1] # On renvoie le plus petit numéro libre après cet interval
@@ -142,8 +146,8 @@ def main():
 
     variables = [(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)]
     # valuesPossible = list(range(10))
-    # valuesPossible = [0]+[2**i for i in range(7)]
-    valuesPossible = [0,1]
+    valuesPossible = [2**i for i in range(5)]
+    # valuesPossible = [0,1]
     bestRatio = 0
 
     def recursiveTest(positionVariable):
@@ -159,25 +163,23 @@ def main():
                 properNumbering = doProperKNumbering(graph, weight)
                 k = max(properNumbering)
                 ratio = k / S
-                # if bestRatio < ratio:
-                if k == S+1:
+                if bestRatio < ratio:
                     bestRatio = ratio
+                    print(f"k={max(properNumbering)}\tS={computeS(weight)[0]}\tRATIO={ratio}")
                     afficheGraphe(graph, weight)
-                    print(f"S = {computeS(weight)}")
+                    properNumbering = doProperKNumbering(graph, weight)
+                    print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
+                    giveDataGraph(graph, weight)
+                    print()
+                    print()
+                if k == 2 * S:
+                    afficheGraphe(graph, weight)
+                    print(f"k={max(properNumbering)}\tS={computeS(weight)[0]}\tRATIO={ratio}")
                     properNumbering = doProperKNumbering(graph, weight)
                     print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
                     print(f"We have a vertex {max(properNumbering)}-numbering !")
                     giveDataGraph(graph, weight)
-                    print()
-                    print()
-                # if k == 2 * S:
-                #     afficheGraphe(graph, weight)
-                #     print(f"S = {computeS(weight)}")
-                #     properNumbering = doProperKNumbering(graph, weight)
-                #     print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
-                #     print(f"We have a vertex {max(properNumbering)}-numbering !")
-                #     giveDataGraph(graph, weight)
-                #     exit()
+                    exit()
             return
 
         for value in valuesPossible:
@@ -193,10 +195,13 @@ def main():
 
 
 if __name__ == '__main__':
-    # graph, weight = extractGraph("graph2")
+    # directoryGraphs = "examplesGraphs"
+    # graph, weight = extractGraph(os.path.join(directoryGraphs, "graph4"))
     # # print(graph)
     # print(f"S = {computeS(weight)}")
     # properNumbering = doProperKNumbering(graph, weight)
+    # afficheGraphe(graph, weight)
+    # giveDataGraph(graph, weight)
     # print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
     # print(f"We have a vertex {max(properNumbering)}-numbering !")
 
