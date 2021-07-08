@@ -131,11 +131,10 @@ def giveDataGraph(graph, weight, useAlphabet=True):
         print(" ".join([str(node) for node in line]))
 
 
-def main():
+def main(N = 4):
     """
-    Nous allons construire K4 et faire varier les coefficients
+    Nous allons construire KN et faire varier les coefficients
     """
-    N = 4
     graph = [[] for _ in range(N)]
     for node in range(N):
         for other in range(N):
@@ -144,9 +143,9 @@ def main():
 
     weight = [[0]*N for _ in range(N)]
 
-    variables = [(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)]
+    variables = [(a,b) for a in range(N) for b in range(N) if a < b]
     # valuesPossible = list(range(10))
-    valuesPossible = [2**i for i in range(5)]
+    valuesPossible = [1,int(1e6)]
     # valuesPossible = [0,1]
     bestRatio = 0
 
@@ -172,7 +171,7 @@ def main():
                     giveDataGraph(graph, weight)
                     print()
                     print()
-                if k == 2 * S:
+                if k >= 2 * S:
                     afficheGraphe(graph, weight)
                     print(f"k={max(properNumbering)}\tS={computeS(weight)[0]}\tRATIO={ratio}")
                     properNumbering = doProperKNumbering(graph, weight)
@@ -205,6 +204,6 @@ if __name__ == '__main__':
     # print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
     # print(f"We have a vertex {max(properNumbering)}-numbering !")
 
-    main()
+    main(8)
     
     
