@@ -106,7 +106,7 @@ def afficheGraphe(graph, weight):
 
 def giveDataGraph(graph, weight, useAlphabet=True):
     """
-    Affiche les données brutes du graphe utilisable pour le site suivant 
+    Affiche les données brutes du graphe utilisable pour le site suivant https://csacademy.com/app/graph_editor/
     """
     nb_noeuds = len(graph)
     print(nb_noeuds)
@@ -142,7 +142,8 @@ def main():
 
     variables = [(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)]
     # valuesPossible = list(range(10))
-    valuesPossible = [2**i for i in range(7)]
+    # valuesPossible = [0]+[2**i for i in range(7)]
+    valuesPossible = [0,1]
     bestRatio = 0
 
     def recursiveTest(positionVariable):
@@ -158,7 +159,8 @@ def main():
                 properNumbering = doProperKNumbering(graph, weight)
                 k = max(properNumbering)
                 ratio = k / S
-                if bestRatio < ratio:
+                # if bestRatio < ratio:
+                if k == S+1:
                     bestRatio = ratio
                     afficheGraphe(graph, weight)
                     print(f"S = {computeS(weight)}")
@@ -168,14 +170,14 @@ def main():
                     giveDataGraph(graph, weight)
                     print()
                     print()
-                if k == 2 * S:
-                    afficheGraphe(graph, weight)
-                    print(f"S = {computeS(weight)}")
-                    properNumbering = doProperKNumbering(graph, weight)
-                    print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
-                    print(f"We have a vertex {max(properNumbering)}-numbering !")
-                    giveDataGraph(graph, weight)
-                    exit()
+                # if k == 2 * S:
+                #     afficheGraphe(graph, weight)
+                #     print(f"S = {computeS(weight)}")
+                #     properNumbering = doProperKNumbering(graph, weight)
+                #     print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
+                #     print(f"We have a vertex {max(properNumbering)}-numbering !")
+                #     giveDataGraph(graph, weight)
+                #     exit()
             return
 
         for value in valuesPossible:
