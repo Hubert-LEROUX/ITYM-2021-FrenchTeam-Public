@@ -104,6 +104,28 @@ def afficheGraphe(graph, weight):
     for node, neighbors in enumerate(graph):
         print(ALPHABET[node], [(ALPHABET[neighbor], weight[node][neighbor]) for neighbor in neighbors])
 
+def giveDataGraph(graph, weight, useAlphabet=True):
+    """
+    Affiche les données brutes du graphe utilisable pour le site suivant 
+    """
+    nb_noeuds = len(graph)
+    print(nb_noeuds)
+
+    def giveNotationNode(node):
+        return ALPHABET[node % len(ALPHABET)] if useAlphabet else node
+
+    # On affiche les noeuds
+    for node in range(nb_noeuds):
+        print(giveNotationNode(node))
+
+    for a in range(nb_noeuds):
+        for b in range(a+1, nb_noeuds):
+            if weight[a][b] > 0:
+                print(giveNotationNode(a), giveNotationNode(b), weight[a][b])
+    print()
+    for line in weight:
+        print(" ".join([str(node) for node in line]))
+
 
 def main():
     """
@@ -119,7 +141,8 @@ def main():
     weight = [[0]*N for _ in range(N)]
 
     variables = [(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)]
-    valuesPossible = list(range(10))
+    # valuesPossible = list(range(10))
+    valuesPossible = [2**i for i in range(7)]
     bestRatio = 0
 
     def recursiveTest(positionVariable):
@@ -131,18 +154,27 @@ def main():
         nonlocal weight, bestRatio
         if positionVariable == -1: # Toutes les cases ont été remplies
             S = computeS(weight)[0]
-            if S > 0:
+            if S > 1:
                 properNumbering = doProperKNumbering(graph, weight)
                 k = max(properNumbering)
                 ratio = k / S
                 if bestRatio < ratio:
                     bestRatio = ratio
+                    afficheGraphe(graph, weight)
+                    print(f"S = {computeS(weight)}")
+                    properNumbering = doProperKNumbering(graph, weight)
+                    print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
+                    print(f"We have a vertex {max(properNumbering)}-numbering !")
+                    giveDataGraph(graph, weight)
+                    print()
+                    print()
                 if k == 2 * S:
                     afficheGraphe(graph, weight)
                     print(f"S = {computeS(weight)}")
                     properNumbering = doProperKNumbering(graph, weight)
                     print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
                     print(f"We have a vertex {max(properNumbering)}-numbering !")
+                    giveDataGraph(graph, weight)
                     exit()
             return
 
