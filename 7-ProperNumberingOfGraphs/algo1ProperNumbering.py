@@ -204,6 +204,6 @@ if __name__ == '__main__':
     # print([(ALPHABET[node], value) for node, value in enumerate(properNumbering)])
     # print(f"We have a vertex {max(properNumbering)}-numbering !")
 
-    main(8)
+    main(5)
     
     
