@@ -116,20 +116,24 @@ def comparaisonAlgos(algos, graphes):
     for position, (graphe, commentaire) in enumerate(graphes):
         graphe = check_graph(graphe)
         SG = S(graphe)
-        print('{:>2}:\tS(G):{:4} | {:40}'.format(position, S(graphe), commentaire), end="\t\t")
-
         resultats = [verification(deepcopy(graphe), algo) for algo in algos]
+        bilan = "🔴"
+        if True in map(lambda x: x[2] + 1 - SG < 1, resultats):
+            bilan = "🟩"
+
+        print('{:>2}:\t S(G):{:4} | {}{:40}'.format(position, S(graphe), bilan, commentaire), end=" \t")
+
         for resultat, _, delta_poids in resultats:
-            icons = "✅"
-            if resultat == True:
+            icons = "🟩"
+            if resultat:
                 if delta_poids + 1 - SG < 1:
-                    icons = "💛"
-                if delta_poids == min([poids for _, _, poids in resultats]):
-                    icons = {1: "🥇", 2: "🥈"}.get([poids for _, _, poids in resultats].count(delta_poids), "🥉")
+                    icons = "🟫"
+                    if delta_poids == min([poids for _, _, poids in resultats]):
+                        icons = {1: "🟨", 2: "🟫"}.get([poids for _, _, poids in resultats].count(delta_poids), "🟫")
             else:
                 icons = "🔴"
                 delta_poids = float("inf")
-            print("{} ({:>3})".format(icons, str(delta_poids + 1 - SG)), end="\t")
+            print("{}({:>3})".format(icons, str(delta_poids + 1 - SG)), end="  ")
         print()
 
 
@@ -203,13 +207,64 @@ graphes_non_pondérées = (
     (nx.full_rary_tree(8, 8), "full_rary_tree"),
 )
 
+
+petits_graphes = (
+    (nx.bull_graph(), "bull_graph"),
+    (nx.chvatal_graph(), "chvatal_graph"),
+    (nx.cubical_graph(), "cubical_graph"),
+    (nx.desargues_graph(), "desargues_graph"),
+    (nx.diamond_graph(), "diamond_graph"),
+    (nx.dodecahedral_graph(), "dodecahedral_graph"),
+    (nx.frucht_graph(), "frucht_graph"),
+    (nx.heawood_graph(), "heawood_graph"),
+    (nx.house_graph(), "house_graph"),
+    (nx.house_x_graph(), "house_x_graph"),
+    (nx.icosahedral_graph(), "icosahedral_graph"),
+    (nx.krackhardt_kite_graph(), "krackhardt_kite_graph"),
+    (nx.moebius_kantor_graph(), "moebius_kantor_graph"),
+    (nx.octahedral_graph(), "octahedral_graph"),
+    (nx.petersen_graph(), "petersen_graph"),
+    (nx.sedgewick_maze_graph(), "sedgewick_maze_graph"),
+    (nx.tetrahedral_graph(), "tetrahedral_graph"),
+    (nx.truncated_cube_graph(), "truncated_cube_graph"),
+    (nx.truncated_tetrahedron_graph(), "truncated_tetrahedron_graph"),
+    (nx.tutte_graph(), "tutte_graph"),
+)
+
+gcomplet8p2 = nx.complete_graph(8)
+gcomplet7p2 = nx.complete_graph(7)
+nx.set_edge_attributes(gcomplet8p2, 2, "weight")
+nx.set_edge_attributes(gcomplet7p2, 2, "weight")
+
 graphes_pondérées = (
+    (nx.Graph([
+        (1, 2, {"weight": 1}),
+        (2, 3, {"weight": 1}),
+        (3, 1, {"weight": 1}),
+    ]), "3-cycle poids 1"),
+    (nx.Graph([
+        (1, 2, {"weight": 2}),
+        (2, 3, {"weight": 2}),
+        (3, 1, {"weight": 2}),
+    ]), "3-cycle poids 2"),
+    (nx.Graph([
+        (1, 2, {"weight": 1}),
+        (2, 3, {"weight": 2}),
+        (3, 1, {"weight": 3}),
+    ]), "3-cycle poids 1,2,3"),
+    (nx.Graph([
+        (1, 2, {"weight": 1}),
+        (2, 3, {"weight": 2}),
+        (3, 1, {"weight": 1}),
+    ]), "3-cycle poids 1,2,1"),
     (nx.Graph([
         (1, 2, {"weight": 1}),
         (1, 3, {"weight": 1}),
         (1, 4, {"weight": 1}),
         (2, 3, {"weight": 1}),
     ]), "Petit test"),
+    (gcomplet8p2, "graphe complet 8 pondéré 2"),
+    (gcomplet7p2, "graphe complet 7 pondéré 2"),
     (nx.Graph([
         (1, 2, {"weight": 6}),
         (1, 3, {"weight": 1}),
@@ -238,47 +293,42 @@ graphes_pondérées = (
     ]), "graphe complet à 4 nodes pondérées"),
 )
 
+seed = int(time.time() * 100000)
+random.seed(a=seed)
+SG = random.randint(1, 100)
+toto = (
+    (graphes_pondérées, "graphes pondérées"),
+    (graphes_non_pondérées, "Graphes non pondérées"),
+    # (petits_graphes, "petits graphes"),
+    (
+        [
+            (forcerSG(graphe, seed=seed, SG=SG), commentaire)
+            for (graphe, commentaire) in graphes_non_pondérées
+        ], f'Graphes pondérées aléatoire : seed={seed} SG={SG}'),
+
+)
+
 if __name__ == "__main__":
     try:
         if input("Entrer une lettre pour un test sur un seul algo : ") in ("\n", " ", ""):
 
             algos = (algoSimple, algoOpti, algoTest)
+            print("\n(", "/".join(map(str, [algo.__name__ for algo in algos])), ")\n")
 
-            print("\n(", "/".join(map(str, [algo.__name__ for algo in algos])),")\n")
-            print("Graphes pondérées :")
-            comparaisonAlgos(algos, [(graphe, commentaire) for (graphe, commentaire) in graphes_pondérées])
-            print("")
-
-            print("Graphes non pondérées :")
-            comparaisonAlgos(algos, [(graphe, commentaire) for (graphe, commentaire) in graphes_non_pondérées])
-            print("")
-
-            seed = int(time.time() * 100000)
-            random.seed(a=seed)
-            SG = random.randint(1, 100)
-            print("Graphes pondérées aléatoire : seed=", seed, " SG=", SG, sep="")
-            comparaisonAlgos(algos, [(forcerSG(graphe, seed=seed, SG=SG), commentaire) for (graphe, commentaire) in graphes_non_pondérées])
-            print("")
+            for graphes, desc in toto:
+                print(desc, ":")
+                comparaisonAlgos(algos, graphes)
+                print("")
 
         else:
             # algo = algoOpti
             algo = algoTest
             print("Test de l'algo : ", algo.__name__, "\n")
 
-            print("Graphes pondérées :")
-            bandeTests(algo, [(graphe, commentaire) for (graphe, commentaire) in graphes_pondérées])
-            print("")
-
-            print("Graphes non pondérées :")
-            bandeTests(algo, [(graphe, commentaire) for (graphe, commentaire) in graphes_non_pondérées])
-            print("")
-
-            seed = int(time.time() * 100000)
-            random.seed(a=seed)
-            SG = random.randint(1, 100)
-            print("Graphes pondérées aléatoire : seed=", seed, " SG=", SG, sep="")
-            bandeTests(algo, [(forcerSG(graphe, seed=seed, SG=SG), commentaire) for (graphe, commentaire) in graphes_non_pondérées])
-            print("")
+            for graphes, desc in toto:
+                print(desc, ":")
+                bandeTests(algos, graphes)
+                print("")
 
             if input("(o/y/ ) pour continuer avec des graphes aléatoires : ") not in ("o", "y", " "):
                 exit(0)
